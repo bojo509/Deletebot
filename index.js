@@ -1,0 +1,56 @@
+const { Client, GatewayIntentBits } = require('discord.js');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
+// Create a new client instance with the necessary intents
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
+});
+
+// When the client is ready, run this code
+client.once('ready', () => {
+  console.log('Bot is ready!');
+});
+
+// Command handler
+client.on('messageCreate', async message => {
+  console.log(`Received message: ${message.content}`);
+
+  if (message.author.bot) {
+    console.log('Ignoring bot message');
+    return;
+  }
+  if (!message.content.startsWith('!')) {
+    console.log('Ignoring message without prefix');
+    return;
+  }
+
+  const args = message.content.slice(1).trim().split(/ +/);
+  const command = args.shift().toLowerCase();
+
+  console.log(`Parsed command: ${command}`);
+
+  if (command === 'clear') {
+    console.log('Executing clear command');
+    const channel = message.channel;
+    
+    try {
+      const messages = await channel.messages.fetch();
+      await channel.bulkDelete(messages);
+      console.log('Messages cleared successfully');
+    } catch (error) {
+      console.error('Error clearing messages:', error);
+      await message.channel.send('An error occurred while clearing messages.');
+    }
+  } else {
+    console.log('Unknown command');
+  }
+});
+
+// Login to Discord with your bot token
+client.login(process.env.BOT_TOKEN);
