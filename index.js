@@ -1,5 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
+const http = require('http');
 const dotenv = require('dotenv');
+const port = process.env.PORT || 8000;
 
 dotenv.config();
 
@@ -54,3 +56,9 @@ client.on('messageCreate', async message => {
 
 // Login to Discord with your bot token
 client.login(process.env.BOT_TOKEN);
+
+
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('OK');
+}).listen(port, () => console.log(`Health check server running on port ${port}`));
