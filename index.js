@@ -21,14 +21,10 @@ client.once('ready', () => {
 
 // Command handler
 client.on('messageCreate', async message => {
-  console.log(`Received message: ${message.content}`);
-
   if (message.author.bot) {
-    console.log('Ignoring bot message');
     return;
   }
   if (!message.content.startsWith('!')) {
-    console.log('Ignoring message without prefix');
     return;
   }
 
