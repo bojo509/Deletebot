@@ -57,7 +57,6 @@ client.on('messageCreate', async message => {
       }
       
       console.log(`Individually deleted ${oldMessages.size} old messages`);
-      await message.channel.send('Channel cleared successfully!');
     } catch (error) {
       console.error('Error clearing messages:', error);
       await message.channel.send('An error occurred while clearing messages.');
