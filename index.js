@@ -1,9 +1,9 @@
-const { Client, GatewayIntentBits } = require('discord.js');
-const http = require('http');
-const dotenv = require('dotenv');
+import { Client, GatewayIntentBits } from 'discord.js';
+import { createServer } from 'http';
+import { config } from 'dotenv';
 const port = process.env.PORT || 8000;
 
-dotenv.config();
+config();
 
 // Create a new client instance with the necessary intents
 const client = new Client({
@@ -39,8 +39,25 @@ client.on('messageCreate', async message => {
     
     try {
       const messages = await channel.messages.fetch();
-      await channel.bulkDelete(messages);
-      console.log('Messages cleared successfully');
+      const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+      
+      // Separate messages into recent and old
+      const recentMessages = messages.filter(msg => msg.createdTimestamp > twoWeeksAgo);
+      const oldMessages = messages.filter(msg => msg.createdTimestamp <= twoWeeksAgo);
+
+      // Bulk delete recent messages if any exist
+      if (recentMessages.size > 0) {
+        await channel.bulkDelete(recentMessages);
+        console.log(`Bulk deleted ${recentMessages.size} recent messages`);
+      }
+
+      // Delete old messages one by one
+      for (const msg of oldMessages.values()) {
+        await msg.delete();
+      }
+      
+      console.log(`Individually deleted ${oldMessages.size} old messages`);
+      await message.channel.send('Channel cleared successfully!');
     } catch (error) {
       console.error('Error clearing messages:', error);
       await message.channel.send('An error occurred while clearing messages.');
@@ -54,7 +71,7 @@ client.on('messageCreate', async message => {
 client.login(process.env.BOT_TOKEN);
 
 
-http.createServer((req, res) => {
+createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('OK');
 }).listen(port, () => console.log(`Health check server running on port ${port}`));
